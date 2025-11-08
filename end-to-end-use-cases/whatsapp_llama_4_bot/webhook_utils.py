@@ -99,9 +99,23 @@ async def llm_reply_to_text_v2(user_input: str, user_phone: str, media_id: str =
         
         async with httpx.AsyncClient() as client:
           response = await client.post("https://df00-171-60-176-142.ngrok-free.app/llm-response", json=json_data, headers=headers,timeout=60)
-          response_data = response.json()
-          # print(response_data)
-          if response.status_code == 200 and response_data['error'] == None:
+
+          content_type = response.headers.get("content-type", "")
+          if "application/json" not in content_type:
+              preview = response.text[:200] if response.text else "<empty>"
+              print(f"Unexpected content-type from LLM API: {content_type}, preview: {preview}")
+              await send_message_async(user_phone, "LLM response was not valid JSON.")
+              return
+
+          try:
+              response_data = response.json()
+          except ValueError as json_err:
+              preview = response.text[:200] if response.text else "<empty>"
+              print(f"Failed to parse LLM JSON response: {json_err}. Body preview: {preview}")
+              await send_message_async(user_phone, "LLM response could not be parsed.")
+              return
+
+          if response.status_code == 200 and response_data.get('error') is None:
               message_content = response_data['response']
               if message_content:
                   loop = asyncio.get_running_loop()
