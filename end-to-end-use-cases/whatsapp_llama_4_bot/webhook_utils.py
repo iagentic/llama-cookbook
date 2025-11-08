@@ -1,8 +1,10 @@
 import os
 import base64
 import asyncio
+import uuid
 import requests
 import httpx
+from pathlib import Path
 from PIL import Image
 from dotenv import load_dotenv
 from io import BytesIO
@@ -114,3 +116,40 @@ async def llm_reply_to_text_v2(user_input: str, user_phone: str, media_id: str =
     except Exception as e:
         print("LLM error:", e)
         await send_message_async(user_phone, "Sorry, something went wrong while generating a response.")
+
+
+async def audio_conversion(user_input: str, media_id: str, kind: str = "audio") -> str:
+    if kind != "audio":
+        raise ValueError("audio_conversion currently supports only 'audio' kind.")
+
+    if not BASE_URL:
+        raise RuntimeError("BASE_URL is not configured for audio conversion.")
+
+    request_payload = {
+        "user_input": user_input,
+        "media_id": media_id,
+        "kind": kind,
+    }
+
+    url = f"{BASE_URL.rstrip('/')}/llm-response"
+    headers = {
+        "accept": "audio/mpeg",
+        "Content-Type": "application/json",
+    }
+
+    async with httpx.AsyncClient(timeout=120) as client:
+        response = await client.post(url, json=request_payload, headers=headers)
+
+    if response.status_code != 200:
+        raise RuntimeError(f"Audio conversion failed with status {response.status_code}: {response.text}")
+
+    content_type = response.headers.get("content-type", "")
+    if "audio" not in content_type:
+        raise RuntimeError(f"Expected audio response, received content type '{content_type}'. Body: {response.text}")
+
+    output_dir = os.getenv("AUDIO_OUTPUT_DIR", ".")
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    output_path = Path(output_dir) / f"reply_{uuid.uuid4().hex}.mp3"
+    output_path.write_bytes(response.content)
+
+    return str(output_path)
