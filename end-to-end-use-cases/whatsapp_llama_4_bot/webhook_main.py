@@ -19,7 +19,7 @@ load_dotenv()
 
 VERIFY_TOKEN = os.getenv("WHATSAPP_VERIFY_TOKEN")
 
-app = FastAPI(title="WhatsApp Webhook App")
+app = FastAPI(title="WhatsApp Webhook App", redirect_slashes=False)
 
 
 class WhatsAppWebhook(BaseModel):
