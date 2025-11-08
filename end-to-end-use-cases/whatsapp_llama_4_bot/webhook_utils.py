@@ -16,6 +16,7 @@ WHATSAPP_API_URL = os.getenv("WHATSAPP_API_URL")
 TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
 MEDIA_URL = "https://graph.facebook.com/v20.0/{media_id}"
 BASE_URL = os.getenv("BASE_URL")
+AGENT_BASE_URL = os.getenv("AGENT_BASE_URL") or BASE_URL
 PHONE_NUMBER_ID = os.getenv("PHONE_NUMBER_ID")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
@@ -91,6 +92,9 @@ async def llm_reply_to_text_v2(user_input: str, user_phone: str, media_id: str =
         'Content-Type': 'application/json',
     }
 
+        if not AGENT_BASE_URL:
+            raise RuntimeError("AGENT_BASE_URL (or BASE_URL) is not configured for LLM calls.")
+
         json_data = {
             'user_input': user_input,
             'media_id': media_id,
@@ -98,7 +102,12 @@ async def llm_reply_to_text_v2(user_input: str, user_phone: str, media_id: str =
         }
         
         async with httpx.AsyncClient() as client:
-          response = await client.post("https://df00-171-60-176-142.ngrok-free.app/llm-response", json=json_data, headers=headers,timeout=60)
+          response = await client.post(
+              f"{AGENT_BASE_URL.rstrip('/')}/llm-response",
+              json=json_data,
+              headers=headers,
+              timeout=60,
+          )
 
           content_type = response.headers.get("content-type", "")
           if "application/json" not in content_type:
