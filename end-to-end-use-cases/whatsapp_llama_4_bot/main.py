@@ -7,8 +7,8 @@ load_dotenv()
 
 app = FastAPI(title="WhatsApp + Agent API", redirect_slashes=False)
 
-# Mount both under separate prefixes
-app.mount("/webhook", webhook_app)
+# Expose both apps under prefixes
+app.include_router(webhook_app.router, prefix="/webhook")
 app.mount("/agent", ec2_app)
 
 # Health check
