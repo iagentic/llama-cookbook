@@ -2,7 +2,13 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional
-from service import text_to_speech, get_llm_response, handle_image_message,handle_audio_message,send_audio_message
+from ec2_services import (
+    text_to_speech,
+    get_llm_response,
+    handle_image_message,
+    handle_audio_message,
+    send_audio_message,
+)
 from enum import Enum
 app = FastAPI()
 
