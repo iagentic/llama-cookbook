@@ -102,7 +102,7 @@ def get_llm_response(text_input: str, image_input : str = None) -> str:
         #client = Together(api_key=TOGETHER_API_KEY)
         client = OpenAI(base_url= "https://api.llama.com/compat/v1/")
         completion = client.chat.completions.create(
-            model="Llama-4-Maverick-17B-128E-Instruct-FP8",
+            model="meta-llama/llama-4-maverick-17b-128e-instruct",
             messages=[
                 {
                     "role": "user",
