@@ -100,7 +100,7 @@ def get_llm_response(text_input: str, image_input : str = None) -> str:
     })
     try:
         #client = Together(api_key=TOGETHER_API_KEY)
-        client = OpenAI(base_url= "https://api.llama.com/compat/v1/")
+        client = OpenAI(base_url= "https://api.groq.com/openai/v1/")
         completion = client.chat.completions.create(
             model="meta-llama/llama-4-maverick-17b-128e-instruct",
             messages=[
