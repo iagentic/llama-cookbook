@@ -54,6 +54,15 @@ async def verify_webhook(
     raise HTTPException(status_code=403, detail="Verification failed")
 
 
+@app.get("")
+async def verify_webhook_no_slash(
+    hub_mode: str = Query(None, alias="hub.mode"),
+    hub_verify_token: str = Query(None, alias="hub.verify_token"),
+    hub_challenge: str = Query(None, alias="hub.challenge"),
+):
+    return await verify_webhook(hub_mode, hub_verify_token, hub_challenge)
+
+
 # This will be exposed as: POST /webhook at the top-level (mounted in main.py)
 @app.post("/")
 async def whatsapp_webhook(payload: WhatsAppWebhook, background_tasks: BackgroundTasks):
@@ -132,3 +141,8 @@ async def whatsapp_webhook(payload: WhatsAppWebhook, background_tasks: Backgroun
             {"status": "error", "detail": str(e)},
             status_code=500,
         )
+
+
+@app.post("")
+async def whatsapp_webhook_no_slash(payload: WhatsAppWebhook, background_tasks: BackgroundTasks):
+    return await whatsapp_webhook(payload, background_tasks)
