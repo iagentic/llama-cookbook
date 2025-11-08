@@ -1,5 +1,4 @@
-from together import Together
-from openai import OpenAI 
+from openai import OpenAI
 import os
 import base64
 import asyncio
@@ -12,9 +11,6 @@ from pathlib import Path
 from groq import Groq
 load_dotenv()
 
-TOGETHER_API_KEY = os.getenv("TOGETHER_API_KEY")
-LLAMA_API_KEY = os.getenv("LLAMA_API_KEY")
-#LLAMA_API_URL = os.getenv("API_URL")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 META_ACCESS_TOKEN = os.getenv("META_ACCESS_TOKEN")
 PHONE_NUMBER_ID = os.getenv("PHONE_NUMBER_ID")
@@ -76,7 +72,7 @@ def speech_to_text(input_path: str) -> str:
 
 
 
-def get_llm_response(text_input: str, image_input : str = None) -> str:
+def get_llm_response(text_input: str, image_input: str = None) -> str:
     """
     Get the response from the Together AI LLM given a text input and an optional image input.
 
@@ -99,8 +95,11 @@ def get_llm_response(text_input: str, image_input : str = None) -> str:
         "text": text_input
     })
     try:
+        if not GROQ_API_KEY:
+            raise RuntimeError("GROQ_API_KEY is not configured.")
+
         #client = Together(api_key=TOGETHER_API_KEY)
-        client = OpenAI(base_url= "https://api.groq.com/openai/v1/")
+        client = OpenAI(api_key=GROQ_API_KEY, base_url="https://api.groq.com/openai/v1/")
         completion = client.chat.completions.create(
             model="meta-llama/llama-4-maverick-17b-128e-instruct",
             messages=[
@@ -114,7 +113,7 @@ def get_llm_response(text_input: str, image_input : str = None) -> str:
         if completion.choices and len(completion.choices) > 0:
             return completion.choices[0].message.content
         else:
-            print("Empty response from Together API")
+            print("Empty response from Groq OpenAI-compatible API")
             return None
     except Exception as e:
         print(f"LLM error: {e}")
