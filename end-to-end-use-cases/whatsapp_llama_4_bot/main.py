@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = FastAPI(title="WhatsApp + Agent API")
+app = FastAPI(title="WhatsApp + Agent API", redirect_slashes=False)
 
 # Mount both under separate prefixes
 app.mount("/webhook", webhook_app)
